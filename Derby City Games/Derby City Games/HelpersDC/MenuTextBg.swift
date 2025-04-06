@@ -1,18 +1,21 @@
-//
-//  MenuTextBg.swift
-//  Derby City Games
-//
-//  Created by Dias Atudinov on 06.04.2025.
-//
+
 
 import SwiftUI
 
 struct MenuTextBg: View {
+    @State var text: String
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        ZStack {
+            Image(.buttonBgDC)
+                .resizable()
+                .scaledToFit()
+            
+            TextWithBorder(text: text, font: .system(size: DeviceInfo.shared.deviceType == .pad ?  64:32, weight: .bold), textColor: .white, borderColor: .black, borderWidth: 1)
+                .offset(y: DeviceInfo.shared.deviceType == .pad ? -8:-4)
+        }.frame(height: DeviceInfo.shared.deviceType == .pad ? 200:100)
     }
 }
 
 #Preview {
-    MenuTextBg()
+    MenuTextBg(text: "Play")
 }
