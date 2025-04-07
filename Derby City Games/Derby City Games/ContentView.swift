@@ -1,10 +1,3 @@
-//
-//  ContentView.swift
-//  Derby City Games
-//
-//  Created by Dias Atudinov on 05.04.2025.
-//
-
 import SwiftUI
 
 struct ContentView: View {

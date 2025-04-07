@@ -1,11 +1,3 @@
-//
-//  CTDUser.swift
-//  Derby City Games
-//
-//  Created by Dias Atudinov on 06.04.2025.
-//
-
-
 import SwiftUI
 
 class CTDUser: ObservableObject {
