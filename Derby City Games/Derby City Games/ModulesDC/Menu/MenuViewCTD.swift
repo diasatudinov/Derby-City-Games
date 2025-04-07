@@ -1,75 +1,69 @@
-//
-//  MenuViewCTD.swift
-//  Derby City Games
-//
-//  Created by Dias Atudinov on 06.04.2025.
-//
-
-
 import SwiftUI
 
 struct MenuViewCTD: View {
     @State private var showGame = false
+    @State private var showRules = false
     @State private var showShop = false
-    @State private var showStatistics = false
+    @State private var showAchievements = false
     @State private var showSettings = false
     
-//    @StateObject var shopVM = ShopViewModelCTD()
-//    @StateObject var settingsVM = SettingsViewModelCTD()
-//    @StateObject var statVM = StatisticsViewModelCTD()
+    
+    //    @StateObject var shopVM = ShopViewModelCTD()
+    @StateObject var settingsVM = SettingsViewModelDC()
+    @StateObject var achievementsVM = AchievementsViewModel()
     var body: some View {
         
-        GeometryReader { geometry in
-            ZStack {
-                VStack(spacing: 20) {
-                    ZStack {
-                        HStack(alignment: .top) {
-                            Button {
-                                showSettings = true
-                            } label: {
-                                Image(.rulesIconDC)
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(height: DeviceInfo.shared.deviceType == .pad ? 100:50)
-                            }
-                            Spacer()
-                            
-                            
-                            MoneyViewDC()
-                        }
-                        HStack {
-                            Spacer()
-                            Image(.logoDC)
+        ZStack {
+            VStack(spacing: 20) {
+                ZStack(alignment: .top) {
+                    HStack(alignment: .top) {
+                        Button {
+                            showRules = true
+                        } label: {
+                            Image(.rulesIconDC)
                                 .resizable()
                                 .scaledToFit()
-                                .frame(height: DeviceInfo.shared.deviceType == .pad ? 228:114)
-                            
-                            Spacer()
-                        }
-                        
-                    }
-                    HStack {
-                        VStack {
-                            Spacer()
-                            Image(.menuBullDC)
-                                .resizable()
-                                .scaledToFit()
-                                .frame(height: DeviceInfo.shared.deviceType == .pad ? 440:220)
-                                .ignoresSafeArea()
-                            
+                                .frame(height: DeviceInfo.shared.deviceType == .pad ? 100:50)
                         }
                         Spacer()
+                        
+                        
+                        MoneyViewDC()
+                    }
+                    
+                    HStack(alignment: .top) {
+                        Spacer()
+                        Image(.logoDC)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(height: DeviceInfo.shared.deviceType == .pad ? 228:114)
+                        
+                        Spacer()
+                    }
+                    
+                }.padding([.horizontal, .top], 20)
+                HStack {
+                    VStack {
+                        Spacer()
+                        Image(.menuBullDC)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(height: DeviceInfo.shared.deviceType == .pad ? 300:200)
+                            .ignoresSafeArea()
+                        
+                    }
+                    Spacer()
                     VStack {
                         HStack(spacing: 20) {
                             Spacer()
                             Button {
-                                showSettings = true
+                                showGame = true
                             } label: {
                                 MenuTextBg(text: "Play")
                             }
                             
                             Button {
-                                showStatistics = true
+                                showShop = true
                             } label: {
                                 MenuTextBg(text: "Store")
                             }
@@ -79,7 +73,7 @@ struct MenuViewCTD: View {
                         HStack(spacing: 20) {
                             
                             Button {
-                                showStatistics = true
+                                showAchievements = true
                             } label: {
                                 ZStack {
                                     Image(.buttonBgDC)
@@ -103,54 +97,51 @@ struct MenuViewCTD: View {
                             }
                         }
                     }
-                        VStack {
-                            Spacer()
-                            Image(.menuBullDC)
-                                .resizable()
-                                .scaledToFit()
-                                .frame(height: DeviceInfo.shared.deviceType == .pad ? 440:220)
-                                .ignoresSafeArea()
-                                .opacity(0)
-                        }
+                    VStack {
+                        Spacer()
+                        Image(.menuBullDC)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(height: DeviceInfo.shared.deviceType == .pad ? 300:200)
+                            .ignoresSafeArea()
+                            .opacity(0)
+                    }
                 }
-                    
-                }.padding()
-            }.ignoresSafeArea()
+                
+            }
+        }.ignoresSafeArea()
             .background(
                 Image(.bgDC)
                     .resizable()
                     .ignoresSafeArea()
                     .scaledToFill()
-                  
+                
                 
             )
-//            .onAppear {
-//                if settingsVM.musicEnabled {
-//                    MusicManagerCTD.shared.playBackgroundMusic()
-//                }
-//            }
-//            .onChange(of: settingsVM.musicEnabled) { enabled in
-//                if enabled {
-//                    MusicManagerCTD.shared.playBackgroundMusic()
-//                } else {
-//                    MusicManagerCTD.shared.stopBackgroundMusic()
-//                }
-//            }
+        //            .onAppear {
+        //                if settingsVM.musicEnabled {
+        //                    MusicManagerCTD.shared.playBackgroundMusic()
+        //                }
+        //            }
+        //            .onChange(of: settingsVM.musicEnabled) { enabled in
+        //                if enabled {
+        //                    MusicManagerCTD.shared.playBackgroundMusic()
+        //                } else {
+        //                    MusicManagerCTD.shared.stopBackgroundMusic()
+        //                }
+        //            }
             .fullScreenCover(isPresented: $showGame) {
-//                PickChickenViewCTD(viewModel: shopVM, statVM: statVM)
+                SelectGameModeView()
             }
-            .fullScreenCover(isPresented: $showShop) {
-//                ShopViewCTD(viewModel: shopVM)
+            .fullScreenCover(isPresented: $showRules) {
+                RulesView()
             }
-            .fullScreenCover(isPresented: $showStatistics) {
-//                StatisticsViewCTD(statVM: statVM)
+            .fullScreenCover(isPresented: $showAchievements) {
+                AchievementsView(viewModel: achievementsVM)
             }
             .fullScreenCover(isPresented: $showSettings) {
-//                SettingsViewCTD(settings: settingsVM)
+                SettingsView(viewModel: settingsVM)
             }
-            
-        }
-        
         
     }
     

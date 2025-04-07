@@ -1,15 +1,119 @@
-//
-//  SelectGameModeView.swift
-//  Derby City Games
-//
-//  Created by Dias Atudinov on 07.04.2025.
-//
-
 import SwiftUI
 
 struct SelectGameModeView: View {
+    @Environment(\.presentationMode) var presentationMode
+
+    
+    @State private var openOnline = false
+    @State private var openAI = false
+    @State private var openFriend = false
+    
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        ZStack {
+            VStack(spacing: 0) {
+                HStack(alignment: .top) {
+                    Button {
+                        presentationMode.wrappedValue.dismiss()
+
+                    } label: {
+                        Image(.backIconDC)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(height: DeviceInfo.shared.deviceType == .pad ? 100:50)
+                    }
+                    Spacer()
+                    
+                    
+                    MoneyViewDC()
+                }.padding([.horizontal, .top])
+                
+                
+                
+                HStack {
+                    VStack {
+                        Spacer()
+                        Image(.menuBullDC)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(height: DeviceInfo.shared.deviceType == .pad ? 300:200)
+                            
+                        
+                    }
+                    VStack (spacing: 0){
+                        HStack(spacing: 20) {
+                            Spacer()
+                            Button {
+                                openFriend = true
+                            } label: {
+                                ZStack {
+                                    Image(.withFriendBgDC)
+                                        .resizable()
+                                        .scaledToFit()
+                                    
+                                    TextWithBorder(text: "With friend", font: .system(size: DeviceInfo.shared.deviceType == .pad ?  40:20, weight: .bold), textColor: .white, borderColor: .black, borderWidth: 1)
+                                        .offset(y: DeviceInfo.shared.deviceType == .pad ? 46:23)
+                                }.frame(height: DeviceInfo.shared.deviceType == .pad ? 280:140)
+                            }
+                            
+                            Button {
+                                openAI = true
+                            } label: {
+                                ZStack {
+                                    Image(.withAIBgDC)
+                                        .resizable()
+                                        .scaledToFit()
+                                    
+                                    TextWithBorder(text: "With AI", font: .system(size: DeviceInfo.shared.deviceType == .pad ?  40:20, weight: .bold), textColor: .white, borderColor: .black, borderWidth: 1)
+                                        .offset(y: DeviceInfo.shared.deviceType == .pad ? 46:23)
+                                }.frame(height: DeviceInfo.shared.deviceType == .pad ? 280:140)
+                            }
+                            Spacer()
+                        }
+                        
+                        
+                            
+                            Button {
+                                openOnline = true
+                            } label: {
+                                ZStack {
+                                    Image(.onlineBgDC)
+                                        .resizable()
+                                        .scaledToFit()
+                                    
+                                    TextWithBorder(text: "Online", font: .system(size: DeviceInfo.shared.deviceType == .pad ?  40:20, weight: .bold), textColor: .white, borderColor: .black, borderWidth: 1)
+                                        .offset(y: DeviceInfo.shared.deviceType == .pad ? 46:23)
+                                }.frame(height: DeviceInfo.shared.deviceType == .pad ? 310:155)
+                            }
+                        
+                    }
+                    
+                    VStack {
+                        Spacer()
+                        Image(.menuBullDC)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(height: DeviceInfo.shared.deviceType == .pad ? 300:200)
+                            .ignoresSafeArea()
+                            .opacity(0)
+                    }
+                }.ignoresSafeArea()
+                
+            }
+        }
+            .background(
+                Image(.bgDC)
+                    .resizable()
+                    .ignoresSafeArea()
+                    .scaledToFill()
+                
+                
+            )
+            .fullScreenCover(isPresented: $openAI) {
+            }
+            .fullScreenCover(isPresented: $openFriend) {
+            }
+            .fullScreenCover(isPresented: $openOnline) {
+            }
     }
 }
 
