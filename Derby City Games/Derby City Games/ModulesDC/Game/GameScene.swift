@@ -1,25 +1,18 @@
-//
-//  Turn.swift
-//  Derby City Games
-//
-//  Created by Dias Atudinov on 07.04.2025.
-//
-
-
 import SpriteKit
 import GameplayKit
-
-// Перечисление для очередности ходов
-enum Turn {
-    case player
-    case opponent
-}
 
 // Физические категории для столкновений
 struct PhysicsCategory {
     static let bullBody: UInt32 = 0x1 << 0
     static let bullHead: UInt32 = 0x1 << 1
     static let projectile: UInt32 = 0x1 << 2
+    static let wall: UInt32 = 0x1 << 3
+}
+
+// Перечисление для очередности ходов
+enum Turn {
+    case player
+    case opponent
 }
 
 class GameScene: SKScene, SKPhysicsContactDelegate {
@@ -36,7 +29,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     // Параметры броска
     var angle: CGFloat = 45.0    // в градусах
-    var force: CGFloat = 50.0    // произвольные единицы
+    var force: CGFloat = 5.0    // произвольные единицы
     var angleLabel: SKLabelNode!
     var forceLabel: SKLabelNode!
     
@@ -63,9 +56,20 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         randomizeWind()
     }
     
-    // Можно добавить оформление арены
+    // Настройка арены: добавляем стену между игроками
     func setupArena() {
-        // Например, задний фон или препятствия
+        // Стена располагается в центре между игроками.
+        let wallWidth: CGFloat = 20
+        let wallHeight: CGFloat = size.height * 0.4
+        let wall = SKSpriteNode(color: .gray, size: CGSize(width: wallWidth, height: wallHeight))
+        wall.position = CGPoint(x: size.width / 2, y: size.height * 0.2 + wallHeight / 2)
+        wall.name = "wall"
+        wall.zPosition = 2
+        wall.physicsBody = SKPhysicsBody(rectangleOf: wall.size)
+        wall.physicsBody?.isDynamic = false
+        wall.physicsBody?.categoryBitMask = PhysicsCategory.wall
+        wall.physicsBody?.collisionBitMask = PhysicsCategory.projectile
+        addChild(wall)
     }
     
     // Создаём быков, их физические тела и «головы» для критического урона
@@ -73,17 +77,15 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         // Игрок
         playerBull = SKSpriteNode(imageNamed: "bull")
         playerBull.position = CGPoint(x: size.width * 0.2, y: size.height * 0.2)
-        playerBull.zPosition = 1
+        playerBull.zPosition = 3
         addChild(playerBull)
         
-        // Физическое тело для тела
         let playerBody = SKPhysicsBody(rectangleOf: CGSize(width: playerBull.size.width * 0.8,
                                                             height: playerBull.size.height * 0.6))
         playerBody.isDynamic = false
         playerBody.categoryBitMask = PhysicsCategory.bullBody
         playerBull.physicsBody = playerBody
         
-        // Добавляем «голову» как отдельный узел (для критических попаданий)
         let playerHead = SKShapeNode(circleOfRadius: playerBull.size.width * 0.2)
         playerHead.fillColor = .red
         playerHead.strokeColor = .clear
@@ -98,7 +100,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         opponentBull = SKSpriteNode(imageNamed: "bull")
         opponentBull.xScale = -1   // Отзеркаливаем для разнообразия
         opponentBull.position = CGPoint(x: size.width * 0.8, y: size.height * 0.2)
-        opponentBull.zPosition = 1
+        opponentBull.zPosition = 3
         addChild(opponentBull)
         
         let opponentBody = SKPhysicsBody(rectangleOf: CGSize(width: opponentBull.size.width * 0.8,
@@ -173,17 +175,16 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         let nodesAtPoint = nodes(at: location)
         
         if nodesAtPoint.contains(where: { $0.name == "throwButton" }) {
-            // Если ход игрока, запускаем бросок
             if currentTurn == .player {
                 launchProjectile(from: playerBull.position, isPlayer: true)
             }
         } else {
-            // Если касание слева – меняем угол, справа – силу
+            // Левая половина экрана меняет угол, правая – силу
             if location.x < size.width / 2 {
                 angle = max(10, min(80, (location.y / size.height) * 90))
                 angleLabel.text = "Angle: \(Int(angle))°"
             } else {
-                force = max(20, min(100, (location.y / size.height) * 120))
+                force = max(5, min(20, (location.y / size.height) * 20))
                 forceLabel.text = "Force: \(Int(force))"
             }
         }
@@ -191,29 +192,40 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     // Функция запуска снаряда
     func launchProjectile(from position: CGPoint, isPlayer: Bool) {
-        // Создаём снаряд (можно заменить на изображение или добавить разные типы)
+        // Создаём снаряд, делаем его более заметным и устанавливаем zPosition выше, чтобы он был поверх других элементов.
         let projectile = SKShapeNode(circleOfRadius: 10)
-        projectile.fillColor = .gray
+        projectile.fillColor = .yellow
         projectile.strokeColor = .black
-        projectile.position = position
+        projectile.zPosition = 4
+        
+        // Смещаем начальную позицию, чтобы снаряд не начинался внутри быка, который его бросает.
+        var startPosition = position
+        if isPlayer {
+            // Для игрока смещаем вправо и вверх
+            startPosition.x += 50
+            startPosition.y += 50
+        } else {
+            // Для противника смещаем влево и вверх
+            startPosition.x -= 50
+            startPosition.y += 50
+        }
+        projectile.position = startPosition
         
         projectile.physicsBody = SKPhysicsBody(circleOfRadius: 10)
         projectile.physicsBody?.affectedByGravity = true
         projectile.physicsBody?.categoryBitMask = PhysicsCategory.projectile
-        projectile.physicsBody?.contactTestBitMask = PhysicsCategory.bullBody | PhysicsCategory.bullHead
-        projectile.physicsBody?.collisionBitMask = 0
-        
+        projectile.physicsBody?.contactTestBitMask = PhysicsCategory.bullBody | PhysicsCategory.bullHead | PhysicsCategory.wall
+        projectile.physicsBody?.collisionBitMask = PhysicsCategory.bullBody | PhysicsCategory.bullHead | PhysicsCategory.wall
         addChild(projectile)
         
-        // Переводим угол в радианы и рассчитываем импульс
+        // Переводим угол в радианы и рассчитываем импульс.
         let radians = angle * (.pi / 180)
-        // Для игрока снаряд летит вправо, для противника – влево
         let dx = cos(radians) * force * (isPlayer ? 1 : -1)
         let dy = sin(radians) * force
         let impulse = CGVector(dx: dx, dy: dy)
         projectile.physicsBody?.applyImpulse(impulse)
         
-        // Если бросок был игроком, переключаем ход и запускаем ИИ с задержкой
+        // Переключаем ход: если был ход игрока, запускаем ИИ с задержкой.
         if currentTurn == .player {
             currentTurn = .opponent
             run(SKAction.wait(forDuration: 2.0)) { [weak self] in
@@ -224,16 +236,16 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         }
     }
     
-    // Простой ИИ: случайно выбирает угол и силу, затем бросает снаряд от позиции противника
+    // Простой ИИ: случайно выбирает угол и силу, затем бросает снаряд от позиции противника.
     func aiTurn() {
         angle = CGFloat.random(in: 20...70)
-        force = CGFloat.random(in: 30...90)
+        force = CGFloat.random(in: 3...9)
         angleLabel.text = "Angle: \(Int(angle))°"
         forceLabel.text = "Force: \(Int(force))"
         launchProjectile(from: opponentBull.position, isPlayer: false)
     }
     
-    // В методе update каждую итерацию на все снаряды действует сила ветра
+    // В методе update каждую итерацию к снаряду применяется сила ветра.
     override func update(_ currentTime: TimeInterval) {
         for node in children {
             if let shape = node as? SKShapeNode,
@@ -243,8 +255,19 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         }
     }
     
-    // Обработка столкновений: определяем, попал ли снаряд в тело или голову, и рассчитываем урон.
+    // Обработка столкновений: определяем попадания по быкам и удаляем снаряд при столкновении со стеной.
     func didBegin(_ contact: SKPhysicsContact) {
+        // Если снаряд столкнулся со стеной – удаляем его.
+        if (contact.bodyA.categoryBitMask == PhysicsCategory.projectile && contact.bodyB.categoryBitMask == PhysicsCategory.wall) ||
+            (contact.bodyB.categoryBitMask == PhysicsCategory.projectile && contact.bodyA.categoryBitMask == PhysicsCategory.wall) {
+            if contact.bodyA.categoryBitMask == PhysicsCategory.projectile {
+                contact.bodyA.node?.removeFromParent()
+            } else {
+                contact.bodyB.node?.removeFromParent()
+            }
+            return
+        }
+        
         var projectileNode: SKNode?
         var bullNode: SKNode?
         var isHeadHit = false
@@ -271,7 +294,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         // Определяем, какой из быков получил урон
         if let bull = bullNode {
-            // Проверяем, к какому родителю принадлежит узел головы (так мы определяем, чей это бык)
             if bull.parent == playerBull {
                 playerHealth -= damage
                 playerHealthLabel.text = "Player Health: \(Int(playerHealth))"

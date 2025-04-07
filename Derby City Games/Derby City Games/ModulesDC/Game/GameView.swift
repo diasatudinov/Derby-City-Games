@@ -1,3 +1,11 @@
+//
+//  GameView.swift
+//  Derby City Games
+//
+//  Created by Dias Atudinov on 07.04.2025.
+//
+
+
 import SwiftUI
 import SpriteKit
 
@@ -14,4 +22,8 @@ struct GameView: View {
         SpriteView(scene: scene)
             .ignoresSafeArea() // Игнорируем безопасные зоны для полного покрытия экрана
     }
+}
+
+#Preview {
+    GameView()
 }
