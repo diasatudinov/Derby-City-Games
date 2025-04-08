@@ -1,8 +1,8 @@
 import SwiftUI
 
-class CTDUser: ObservableObject {
+class DCUser: ObservableObject {
     
-    static let shared = CTDUser()
+    static let shared = DCUser()
     
     @AppStorage("money") var storedMoney: Int = 25000
     @Published var money: Int = 25000
