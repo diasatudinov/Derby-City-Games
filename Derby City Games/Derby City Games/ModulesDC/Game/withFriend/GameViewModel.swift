@@ -11,7 +11,7 @@ class GameViewModel: ObservableObject {
     @Published var playerHealth: CGFloat = 100
     @Published var opponentHealth: CGFloat = 100
     @Published var windValue: CGFloat = 0
-    
+    let randomNum = Int.random(in: 1...3)
     // Можно хранить ссылку на сцену:
     weak var gameScene: GameScene?
     
@@ -26,9 +26,7 @@ class GameViewModel: ObservableObject {
         // Сбрасываем здоровье
         playerHealth = 100
         opponentHealth = 100
-        
-        // Обнуляем или меняем ветер
-        windValue = 0
+        windValue = CGFloat.random(in: -8...8)
         
         // Перезапускаем сцену (можно написать свой метод resetScene в GameScene)
         gameScene?.resetScene()
@@ -43,6 +41,11 @@ class GameViewModel: ObservableObject {
     func activateSuperPower2() {
         // Другой эффект, например, «раздвоение» снарядов
         gameScene?.superPowerMode = .multiProjectile
+    }
+    
+    func opponentBullImage() -> String {
+        return "opponentBull\(randomNum)"
+        
     }
     
     // и т.д...
