@@ -2,7 +2,7 @@
 import SwiftUI
 
 struct MoneyViewDC: View {
-    @StateObject var user = CTDUser.shared
+    @StateObject var user = DCUser.shared
     var body: some View {
         ZStack {
             Image(.coinsBgDC)
