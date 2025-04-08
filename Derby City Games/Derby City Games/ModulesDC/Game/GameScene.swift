@@ -15,7 +15,26 @@ enum Turn {
     case opponent
 }
 
+enum SuperPowerMode {
+    case none
+    case doubleDamage
+    case multiProjectile
+}
+
+
 class GameScene: SKScene, SKPhysicsContactDelegate {
+    weak var viewModel: GameViewModel?
+    
+    var superPowerMode: SuperPowerMode = .none
+    
+    override init(size: CGSize) {
+        super.init(size: size)
+        self.scaleMode = .resizeFill
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     // Узлы для быков-игроков
     var playerBull: SKSpriteNode!
@@ -53,7 +72,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         setupArena()
         setupBulls()
         setupUI()
-        randomizeWind()
+        
+        viewModel?.windValue = CGFloat.random(in: -10...10)
     }
     
     // Настройка арены: добавляем стену между игроками
@@ -161,12 +181,20 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         addChild(windLabel)
     }
     
-    // Случайное задание ветра (по оси X)
-    func randomizeWind() {
-        let windSpeed = CGFloat.random(in: -10...10)
-        wind = CGVector(dx: windSpeed, dy: 0)
-        windLabel.text = "Ветер: \(String(format: "%.1f", windSpeed))"
+    func resetScene() {
+        // Удаляем все узлы, пересоздаём арену, быков, т.п.
+        removeAllChildren()
+        removeAllActions()
+        
+        setupArena()
+        setupBulls()
+        
+        superPowerMode = .none
+        
+        // Снова настроим ветер
+        viewModel?.windValue = CGFloat.random(in: -10...10)
     }
+    
     
     // Обработка касаний: если нажата кнопка «Бросить», запускаем бросок. Иначе – меняем угол или силу.
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -247,12 +275,18 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     // В методе update каждую итерацию к снаряду применяется сила ветра.
     override func update(_ currentTime: TimeInterval) {
-        for node in children {
-            if let shape = node as? SKShapeNode,
-               shape.physicsBody?.categoryBitMask == PhysicsCategory.projectile {
-                shape.physicsBody?.applyForce(wind)
+        super.update(currentTime)
+        
+        // Если нужно влиять на снаряды силой ветра из viewModel
+        if let windVal = viewModel?.windValue {
+            for node in children {
+                if let shape = node as? SKShapeNode,
+                   shape.physicsBody?.categoryBitMask == PhysicsCategory.projectile {
+                    shape.physicsBody?.applyForce(CGVector(dx: windVal, dy: 0))
+                }
             }
         }
+        
     }
     
     // Обработка столкновений: определяем попадания по быкам и удаляем снаряд при столкновении со стеной.
