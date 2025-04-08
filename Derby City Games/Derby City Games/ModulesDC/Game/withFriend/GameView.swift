@@ -74,7 +74,7 @@ struct GameView: View {
                 
             }
         } .background(
-            Image(.bgDC)
+            Image(storeVM.currentBgItem?.image ?? "")
                 .resizable()
                 .ignoresSafeArea()
                 .scaledToFill()

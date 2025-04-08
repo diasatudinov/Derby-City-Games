@@ -11,6 +11,7 @@ struct MenuViewCTD: View {
     //    @StateObject var shopVM = ShopViewModelCTD()
     @StateObject var settingsVM = SettingsViewModelDC()
     @StateObject var achievementsVM = AchievementsViewModel()
+    @StateObject var storeVM = StoreViewModelDC()
     var body: some View {
         
         ZStack {
@@ -131,7 +132,7 @@ struct MenuViewCTD: View {
         //                }
         //            }
             .fullScreenCover(isPresented: $showGame) {
-                SelectGameModeView()
+                SelectGameModeView(storeVM: storeVM)
             }
             .fullScreenCover(isPresented: $showRules) {
                 RulesView()
@@ -141,6 +142,9 @@ struct MenuViewCTD: View {
             }
             .fullScreenCover(isPresented: $showSettings) {
                 SettingsView(viewModel: settingsVM)
+            }
+            .fullScreenCover(isPresented: $showShop) {
+                StoreView(viewModel: storeVM)
             }
         
     }

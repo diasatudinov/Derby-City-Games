@@ -81,8 +81,9 @@ struct AIGameView: View {
                 Spacer()
                 
             }
-        } .background(
-            Image(.bgDC)
+        }.background(
+                
+            Image(storeVM.currentBgItem?.image ?? "")
                 .resizable()
                 .ignoresSafeArea()
                 .scaledToFill()

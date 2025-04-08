@@ -1,31 +1,10 @@
 import SpriteKit
 import GameplayKit
 
-// MARK: - Физические категории
-
-struct PhysicsCategory {
-    static let bullBody: UInt32   = 0x1 << 0
-    static let bullHead: UInt32   = 0x1 << 1
-    static let projectile: UInt32 = 0x1 << 2
-    static let wall: UInt32       = 0x1 << 3
-}
-
-// MARK: - Перечисления
-
-enum Turn {
-    case player     // Игрок слева (playerBull)
-    case opponent   // Игрок справа (opponentBull)
-}
-
-enum SuperPowerMode {
-    case none
-    case doubleDamage
-    case multiProjectile
-}
 
 // MARK: - GameScene
 
-class GameScene: SKScene, SKPhysicsContactDelegate {
+class FriendGameScene: SKScene, SKPhysicsContactDelegate {
     
     // -------------------------------------------------------------
     // MARK: - Параметры для силы броска (charge)

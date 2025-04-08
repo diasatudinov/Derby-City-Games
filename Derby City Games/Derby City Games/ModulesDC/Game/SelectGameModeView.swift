@@ -2,7 +2,7 @@ import SwiftUI
 
 struct SelectGameModeView: View {
     @Environment(\.presentationMode) var presentationMode
-
+    @ObservedObject var storeVM: StoreViewModelDC
     
     @State private var openOnline = false
     @State private var openAI = false
@@ -109,14 +109,17 @@ struct SelectGameModeView: View {
                 
             )
             .fullScreenCover(isPresented: $openAI) {
+                AIGameView(storeVM: storeVM)
             }
             .fullScreenCover(isPresented: $openFriend) {
+                GameView(storeVM: storeVM)
             }
             .fullScreenCover(isPresented: $openOnline) {
+                AIGameView(storeVM: storeVM)
             }
     }
 }
 
 #Preview {
-    SelectGameModeView()
+    SelectGameModeView(storeVM: StoreViewModelDC())
 }
