@@ -20,16 +20,15 @@ enum Turn {
 enum SuperPowerMode {
     case none
     case doubleDamage
-    case multiProjectile
+    case shield
+    case superThrow
+    case healing
 }
 
 // MARK: - GameScene
 
 class GameScene: SKScene, SKPhysicsContactDelegate {
     
-    // -------------------------------------------------------------
-    // MARK: - Параметры для силы броска (charge)
-    // -------------------------------------------------------------
     /// Минимальная сила при начале зарядки
     var forceMin: CGFloat = 20
     /// Максимальная сила
@@ -51,11 +50,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     /// Для расчёта времени между кадрами
     var lastUpdateTime: TimeInterval = 0
     
-    
-    // -------------------------------------------------------------
-    // MARK: - Другие свойства и логика игры
-    // -------------------------------------------------------------
-    
     /// Связь со SwiftUI (например, через viewModel, если требуется)
     weak var viewModel: GameViewModel?
     var storeVM = StoreViewModelDC()
@@ -68,8 +62,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     /// Очередность хода
     var currentTurn: Turn = .player
-    
-    
+        
     // MARK: - Жизненный цикл сцены
     
     override func didMove(to view: SKView) {
@@ -92,10 +85,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     // MARK: - Настройка арены
     
     func setupArena() {
-        // Создаём стену с использованием изображения "wall" (50×172)
         let wallNode = SKSpriteNode(imageNamed: "wallDC")
         wallNode.size = CGSize(width: 50, height: 172)
-        // Размещаем стену по центру по оси X и так, чтобы нижняя сторона совпадала с уровнем быков (здесь 170 – высота быка, плюс небольшой отступ)
         wallNode.position = CGPoint(x: size.width / 2, y: 170/2)
         wallNode.zPosition = 2
         
@@ -195,13 +186,18 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     
     // MARK: - Сброс и обновление сцены
-    
     func resetScene() {
         removeAllChildren()
         removeAllActions()
+        
+        // Сбрасываем управляющие переменные:
         superPowerMode = .none
+        isCharging = false
+        forceValue = forceMin
+        lastUpdateTime = 0
+        currentTurn = .player  // или установить тот ход, который нужен по умолчанию
         
-        
+        // Перестраиваем арену, быков, индикатор силы и (при необходимости) индикаторы хода
         setupArena()
         setupBulls()
         setupForceGauge()
@@ -265,6 +261,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         let dy = sin(radians) * force
         projectile.physicsBody?.applyImpulse(CGVector(dx: dx, dy: dy))
         
+        superPowerMode = .none
+        viewModel?.resetPower()
         // После броска переключаем ход
         if isPlayer {
             currentTurn = .opponent
@@ -317,18 +315,19 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             }
         }
         
-        var damage: CGFloat = 5
-        if isHeadHit { damage *= 1.5 }
+        
+        if isHeadHit {
+            viewModel?.playerDamage *= 1.5
+            viewModel?.opponentDamage *= 1.5 }
         
         if let hitBull = bullNode {
-            // Обновляем здоровье через viewModel, если оно подключено.
             if hitBull.parent == playerBull {
-                viewModel?.playerHealth -= damage
+                viewModel?.playerHealth -= viewModel?.opponentDamage ?? 5
                 if let health = viewModel?.playerHealth, health <= 0 {
                     gameOver(winner: "Opponent")
                 }
             } else if hitBull.parent == opponentBull {
-                viewModel?.opponentHealth -= damage
+                viewModel?.opponentHealth -= viewModel?.playerDamage ?? 5
                 if let health = viewModel?.opponentHealth, health <= 0 {
                     gameOver(winner: "Player")
                 }
@@ -338,18 +337,15 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         projectileNode?.removeFromParent()
     }
     
-    
     // MARK: - Завершение игры
     
     func gameOver(winner: String) {
-        let label = SKLabelNode(text: "\(winner) победил!")
-        label.fontSize = 40
-        label.fontColor = .red
-        label.position = CGPoint(x: size.width / 2, y: size.height / 2)
-        label.zPosition = 5
-        addChild(label)
-        
-        isPaused = true
+        viewModel?.gameOver = true
+        if winner == "Player" {
+            viewModel?.playerWin = true
+        } else {
+            viewModel?.playerWin = false
+        }
     }
     
     
@@ -361,7 +357,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         isCharging = true
         forceValue = forceMin
         forceGauge.isHidden = false
-        updateForceGauge() // обновляем индикатор сразу
+        updateForceGauge()
     }
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {

@@ -187,7 +187,7 @@ class FriendGameScene: SKScene, SKPhysicsContactDelegate {
         forceGauge.fillColor = .red
         forceGauge.strokeColor = .clear
         forceGauge.zPosition = 10
-        forceGauge.isHidden = true  // по умолчанию скрыт
+        forceGauge.isHidden = true
         // Размещаем индикатор, например, в верхней части экрана
         forceGauge.position = CGPoint(x: 100, y: size.height * 0.75)
         addChild(forceGauge)
@@ -221,8 +221,15 @@ class FriendGameScene: SKScene, SKPhysicsContactDelegate {
     func resetScene() {
         removeAllChildren()
         removeAllActions()
+        
+        // Сбрасываем управляющие переменные:
         superPowerMode = .none
-        // Перестраиваем арену, быков и индикатор силы (и индикаторы хода)
+        isCharging = false
+        forceValue = forceMin
+        lastUpdateTime = 0
+        currentTurn = .player  // или установить тот ход, который нужен по умолчанию
+        
+        // Перестраиваем арену, быков, индикатор силы и (при необходимости) индикаторы хода
         setupArena()
         setupBulls()
         setupForceGauge()
@@ -361,14 +368,12 @@ class FriendGameScene: SKScene, SKPhysicsContactDelegate {
     // MARK: - Завершение игры
     
     func gameOver(winner: String) {
-        let label = SKLabelNode(text: "\(winner) победил!")
-        label.fontSize = 40
-        label.fontColor = .red
-        label.position = CGPoint(x: size.width / 2, y: size.height / 2)
-        label.zPosition = 5
-        addChild(label)
-        
-        isPaused = true
+        viewModel?.gameOver = true
+        if winner == "Player" {
+            viewModel?.playerWin = true
+        } else {
+            viewModel?.playerWin = false
+        }
     }
     
     
