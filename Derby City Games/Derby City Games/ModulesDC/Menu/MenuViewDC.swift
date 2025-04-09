@@ -7,8 +7,6 @@ struct MenuViewDC: View {
     @State private var showAchievements = false
     @State private var showSettings = false
     
-    
-    //    @StateObject var shopVM = ShopViewModelCTD()
     @StateObject var settingsVM = SettingsViewModelDC()
     @StateObject var achievementsVM = AchievementsViewModel()
     @StateObject var storeVM = StoreViewModelDC()
