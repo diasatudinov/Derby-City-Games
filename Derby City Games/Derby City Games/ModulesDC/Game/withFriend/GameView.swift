@@ -5,6 +5,7 @@ struct GameView: View {
     @Environment(\.presentationMode) var presentationMode
 
     @ObservedObject var storeVM: StoreViewModelDC
+    @ObservedObject var achievementVM: AchievementsViewModel
     @StateObject var viewModel = GameViewModel()
     
     @State private var gameScene: FriendGameScene = {
@@ -66,19 +67,19 @@ struct GameView: View {
                             case "Healing":
                                 SuperPowerButton(iconName: skill.image, action: viewModel.activateSuperPower4, isUsed: $powerUse)
                             default:
-                                Text("")
+                                Text("aa")
                             }
                             
                         }
                     }
 
                     WindBar(windValue: $viewModel.windValue, minVal: -10, maxVal: 10)
-                        .frame(height: 10)
-                        .padding(.horizontal, 40)
-                        .padding(.top, 20)
+                        .frame(height: DeviceInfo.shared.deviceType == .pad ? 20:10)
+                        .padding(.horizontal, DeviceInfo.shared.deviceType == .pad ? 80:40)
+                        .padding(.top, DeviceInfo.shared.deviceType == .pad ? 40:20)
                     
                     HStack(spacing: 20) {
-                        SuperPowerButton(iconName: "", action: viewModel.activateSuperPower4, isUsed: $powerUse).opacity(0)
+                        SuperPowerButton(iconName: "skillsIcon1", action: viewModel.activateSuperPower4, isUsed: $powerUse).opacity(0)
                     }
                 
                 }
@@ -175,19 +176,24 @@ struct GameView: View {
                 }
             }
             
-        } .background(
-            Image(storeVM.currentBgItem?.image ?? "")
+        }.background(
+            Image(storeVM.currentBgItem?.image ?? "aa")
                 .resizable()
                 .ignoresSafeArea()
                 .scaledToFill()
             
-            
         )
+        .onChange(of: viewModel.gameOver) { value in
+            if value {
+                DCUser.shared.achievementDone()
+                achievementVM.achievementIsDone(for: "achievement\(DCUser.shared.achievementNum)")
+            }
+        }
     }
 }
 
 #Preview {
-    GameView(storeVM: StoreViewModelDC())
+    GameView(storeVM: StoreViewModelDC(), achievementVM: AchievementsViewModel())
 }
 
 
@@ -200,30 +206,27 @@ struct HealthBar: View {
     
     var body: some View {
         ZStack {
-            
-            
-            // Заполненная часть
-            if isPlayer {
+                        if isPlayer {
                 ZStack(alignment: .leading) {
                     Image(.hpBgDC)
                         .resizable()
                         .scaledToFit()
-                        .frame(height: 40)
+                        .frame(height: DeviceInfo.shared.deviceType == .pad ? 100:40)
                     RoundedRectangle(cornerRadius: 8)
-                        .frame(width: healthWidth, height: 12)
+                        .frame(width: healthWidth, height: DeviceInfo.shared.deviceType == .pad ? 24:12)
                         .foregroundColor(color)
-                        .offset(x: 15, y: -4)
+                        .offset(x: DeviceInfo.shared.deviceType == .pad ? 30:15, y: DeviceInfo.shared.deviceType == .pad ? -8:-4)
                 }
             } else {
                 ZStack(alignment: .trailing) {
                     Image(.hpBgDC)
                         .resizable()
                         .scaledToFit()
-                        .frame(height: 40)
+                        .frame(height: DeviceInfo.shared.deviceType == .pad ? 80:40)
                     RoundedRectangle(cornerRadius: 8)
-                        .frame(width: otherSideHealthWidth, height: 12)
+                        .frame(width: otherSideHealthWidth, height: DeviceInfo.shared.deviceType == .pad ? 24:12)
                         .foregroundColor(color)
-                        .offset(x: -15, y: -4)
+                        .offset(x: DeviceInfo.shared.deviceType == .pad ? -30:-15, y: DeviceInfo.shared.deviceType == .pad ? -8:-4)
                 }
             }
             HStack {
@@ -234,13 +237,13 @@ struct HealthBar: View {
                 Image(image)
                     .resizable()
                     .scaledToFit()
-                    .frame(height: 67)
+                    .frame(height: DeviceInfo.shared.deviceType == .pad ? 134:67)
                 
                 if !isPlayer {
                     Spacer()
                 }
             }
-        }.frame(width: 305)
+        }.frame(width: DeviceInfo.shared.deviceType == .pad ? 450:305)
     }
     
     private var healthWidth: CGFloat {
@@ -265,7 +268,7 @@ struct WindBar: View {
             Image(.windTextDC)
                 .resizable()
                 .scaledToFit()
-                .frame(height: 30)
+                .frame(height: DeviceInfo.shared.deviceType == .pad ? 60:30)
             ZStack {
                 // Фон
                 Image(.windBgDC)
@@ -275,20 +278,17 @@ struct WindBar: View {
                 // Индикатор ветра
                 Circle()
                     .foregroundColor(.red)
-                    .frame(width: 23, height: 24)
+                    .frame(width: DeviceInfo.shared.deviceType == .pad ? 46:23, height: DeviceInfo.shared.deviceType == .pad ? 48:24)
                 // Позиционируем внутри полосы
-                    .offset(x: offsetX(in: 126), y: 0)
-            }.frame(width: 126, height: 30)
+                    .offset(x: offsetX(in: DeviceInfo.shared.deviceType == .pad ? 252:126), y: 0)
+            }.frame(width: DeviceInfo.shared.deviceType == .pad ? 252:126, height: DeviceInfo.shared.deviceType == .pad ? 60:30)
         }
         
     }
     
     func offsetX(in totalWidth: CGFloat) -> CGFloat {
-        // windValue от minVal до maxVal
-        // 0 => центр
         let range = maxVal - minVal
         let ratio = (windValue - minVal) / range
-        // Чтобы круг был по центру при windValue = 0, нужен сдвиг от -totalWidth/2 до +totalWidth/2
         return (ratio - 0.5) * totalWidth
     }
 }
@@ -307,7 +307,7 @@ struct SuperPowerButton: View {
             Image(iconName)
                 .resizable()
                 .scaledToFit()
-                .frame(width: 42, height: 42)
+                .frame(width: DeviceInfo.shared.deviceType == .pad ? 84:42, height: DeviceInfo.shared.deviceType == .pad ? 84:42)
               
         }
     }

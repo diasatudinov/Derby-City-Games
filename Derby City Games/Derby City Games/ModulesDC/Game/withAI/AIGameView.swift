@@ -72,12 +72,12 @@ struct AIGameView: View {
                     }
 
                     WindBar(windValue: $viewModel.windValue, minVal: -10, maxVal: 10)
-                        .frame(height: 10)
-                        .padding(.horizontal, 40)
-                        .padding(.top, 20)
+                        .frame(height: DeviceInfo.shared.deviceType == .pad ? 20:10)
+                        .padding(.horizontal, DeviceInfo.shared.deviceType == .pad ? 80:40)
+                        .padding(.top, DeviceInfo.shared.deviceType == .pad ? 40:20)
                     
                     HStack(spacing: 20) {
-                        SuperPowerButton(iconName: "", action: viewModel.activateSuperPower4, isUsed: $powerUse).opacity(0)
+                        SuperPowerButton(iconName: "skillsIcon1", action: viewModel.activateSuperPower4, isUsed: $powerUse).opacity(0)
                     }
                 
                 }
@@ -176,7 +176,7 @@ struct AIGameView: View {
             }
         }.background(
                 
-            Image(storeVM.currentBgItem?.image ?? "")
+            Image(storeVM.currentBgItem?.image ?? "aa")
                 .resizable()
                 .ignoresSafeArea()
                 .scaledToFill()

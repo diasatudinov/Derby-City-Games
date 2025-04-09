@@ -77,7 +77,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         // Если viewModel подключён – можно задать ветер
         if viewModel != nil {
-            viewModel?.windValue = CGFloat.random(in: -8...8)
+            DispatchQueue.main.async {
+                self.viewModel?.windValue = CGFloat.random(in: -8...8)
+            }
         }
     }
     
@@ -86,8 +88,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     func setupArena() {
         let wallNode = SKSpriteNode(imageNamed: "wallDC")
-        wallNode.size = CGSize(width: 50, height: 172)
-        wallNode.position = CGPoint(x: size.width / 2, y: 170/2)
+        wallNode.size = CGSize(width: DeviceInfo.shared.deviceType == .pad ? 100:50, height: DeviceInfo.shared.deviceType == .pad ? 344:172)
+        wallNode.position = CGPoint(x: size.width / 2, y: DeviceInfo.shared.deviceType == .pad ? 340/2:170/2)
         wallNode.zPosition = 2
         
         wallNode.physicsBody = SKPhysicsBody(rectangleOf: wallNode.size)
@@ -103,13 +105,16 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     func setupBulls() {
         guard let skinItem = storeVM.currentSkinItem else { return }
+        let bullHeight: CGFloat = DeviceInfo.shared.deviceType == .pad ? 340: 170
+        let margin60: CGFloat = DeviceInfo.shared.deviceType == .pad ? 120: 60
+        let margin20: CGFloat = DeviceInfo.shared.deviceType == .pad ? 40: 20
         // Игрок
         playerBull = SKSpriteNode(imageNamed: skinItem.image)
         // Приводим высоту изображения к 170 с сохранением пропорций
-        let scalePlayer = 170 / playerBull.size.width
-        playerBull.size = CGSize(width: playerBull.size.width * scalePlayer, height: 170)
+        let scalePlayer = bullHeight / playerBull.size.width
+        playerBull.size = CGSize(width: playerBull.size.width * scalePlayer, height: bullHeight)
         // Размещаем игрока слева
-        playerBull.position = CGPoint(x: playerBull.size.width/2 + 60, y: 170/2 + 20)
+        playerBull.position = CGPoint(x: playerBull.size.width/2 + margin60, y: bullHeight/2 + margin20)
         playerBull.zPosition = 3
         addChild(playerBull)
         
@@ -127,8 +132,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         // Соперник
         guard let viewModel = viewModel else { return }
         opponentBull = SKSpriteNode(imageNamed: viewModel.opponentBullImage())
-        opponentBull.size = CGSize(width: opponentBull.size.width * scalePlayer, height: 170)
-        opponentBull.position = CGPoint(x: size.width - (opponentBull.size.width/2 + 60), y: 170/2 + 20)
+        opponentBull.size = CGSize(width: opponentBull.size.width * scalePlayer, height: bullHeight)
+        opponentBull.position = CGPoint(x: size.width - (opponentBull.size.width/2 + margin60), y: bullHeight/2 + margin20)
         opponentBull.zPosition = 3
         addChild(opponentBull)
         
@@ -153,7 +158,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         forceGauge.zPosition = 10
         forceGauge.isHidden = true // по умолчанию скрыт
         // Разместим индикатор в верхней части экрана (можно изменить позицию по желанию)
-        forceGauge.position = CGPoint(x: 100, y: size.height * 0.75)
+        forceGauge.position = CGPoint(x: DeviceInfo.shared.deviceType == .pad ?200:100, y: size.height * 0.75)
         addChild(forceGauge)
     }
     
@@ -170,7 +175,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         let arcAngle = CGFloat.pi * clamped
         let endAngle = startAngle + arcAngle
         
-        let radius: CGFloat = 40
+        let radius: CGFloat = DeviceInfo.shared.deviceType == .pad ? 80:40
         let path = UIBezierPath()
         path.move(to: CGPoint.zero)
         // Рисуем дугу с центром в (0,0)
@@ -234,18 +239,18 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     func launchProjectile(from position: CGPoint, force: CGFloat, angle: CGFloat = 45, isPlayer: Bool = true) {
         guard let throwItem = storeVM.currentThrowItem else { return }
         let projectile = SKSpriteNode(imageNamed: throwItem.image)
-        projectile.size = CGSize(width: 50, height: 50)
+        projectile.size = CGSize(width: DeviceInfo.shared.deviceType == .pad ? 100:50, height: DeviceInfo.shared.deviceType == .pad ? 100:50)
         projectile.name = "projectile"
         projectile.zPosition = 4
         
         // Смещаем стартовую позицию, чтобы снаряд не появлялся внутри быка
         var startPos = position
         if isPlayer {
-            startPos.x += 50
-            startPos.y += 50
+            startPos.x += DeviceInfo.shared.deviceType == .pad ? 100:50
+            startPos.y += DeviceInfo.shared.deviceType == .pad ? 100:50
         } else {
-            startPos.x -= 50
-            startPos.y += 50
+            startPos.x -= DeviceInfo.shared.deviceType == .pad ? 100:50
+            startPos.y += DeviceInfo.shared.deviceType == .pad ? 100:50
         }
         projectile.position = startPos
         

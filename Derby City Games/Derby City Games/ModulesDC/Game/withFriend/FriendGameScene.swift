@@ -67,7 +67,9 @@ class FriendGameScene: SKScene, SKPhysicsContactDelegate {
         
         // При старте задаём случайное значение ветра (если viewModel подключён)
         if viewModel != nil {
-            viewModel?.windValue = CGFloat.random(in: -8...8)
+            DispatchQueue.main.async {
+                self.viewModel?.windValue = CGFloat.random(in: -8...8)
+            }
         }
     }
     
@@ -75,11 +77,9 @@ class FriendGameScene: SKScene, SKPhysicsContactDelegate {
     // MARK: - Настройка арены
     
     func setupArena() {
-        // Создаём стену с использованием изображения "wallDC" (50×172)
         let wallNode = SKSpriteNode(imageNamed: "wallDC")
-        wallNode.size = CGSize(width: 50, height: 172)
-        // Размещаем стену по центру по оси X и так, чтобы нижняя сторона совпадала с уровнем быков (170 – высота быка)
-        wallNode.position = CGPoint(x: size.width / 2, y: 170/2)
+        wallNode.size = CGSize(width: DeviceInfo.shared.deviceType == .pad ? 100:50, height: DeviceInfo.shared.deviceType == .pad ? 344:172)
+        wallNode.position = CGPoint(x: size.width / 2, y: DeviceInfo.shared.deviceType == .pad ? 340/2:170/2)
         wallNode.zPosition = 2
         
         wallNode.physicsBody = SKPhysicsBody(rectangleOf: wallNode.size)
@@ -94,15 +94,20 @@ class FriendGameScene: SKScene, SKPhysicsContactDelegate {
     // MARK: - Настройка быков и индикатора хода
     
     func setupBulls() {
+        
         // Для игрока используем скин из магазина
         guard let skinItem = storeVM.currentSkinItem else { return }
+        let bullHeight: CGFloat = DeviceInfo.shared.deviceType == .pad ? 340: 170
+        let margin60: CGFloat = DeviceInfo.shared.deviceType == .pad ? 120: 60
+        let margin20: CGFloat = DeviceInfo.shared.deviceType == .pad ? 40: 20
+
         // Игрок (слева)
         playerBull = SKSpriteNode(imageNamed: skinItem.image)
         // Приводим высоту к 170, масштабируем по ширине соответственно (в данном случае масштаб рассчитывается по ширине)
-        let scalePlayer = 170 / playerBull.size.width
-        playerBull.size = CGSize(width: playerBull.size.width * scalePlayer, height: 170)
+        let scalePlayer = bullHeight / playerBull.size.width
+        playerBull.size = CGSize(width: playerBull.size.width * scalePlayer, height: bullHeight)
         // Размещаем игрока слева
-        playerBull.position = CGPoint(x: playerBull.size.width/2 + 60, y: 170/2 + 20)
+        playerBull.position = CGPoint(x: playerBull.size.width/2 + margin60, y: bullHeight/2 + margin20)
         playerBull.zPosition = 3
         addChild(playerBull)
         
@@ -128,8 +133,8 @@ class FriendGameScene: SKScene, SKPhysicsContactDelegate {
         guard let viewModel = viewModel else { return }
         opponentBull = SKSpriteNode(imageNamed: viewModel.opponentBullImage())
         // Пропорционально уменьшаем изображение (используем тот же scalePlayer)
-        opponentBull.size = CGSize(width: opponentBull.size.width * scalePlayer, height: 170)
-        opponentBull.position = CGPoint(x: size.width - (opponentBull.size.width/2 + 60), y: 170/2 + 20)
+        opponentBull.size = CGSize(width: opponentBull.size.width * scalePlayer, height: bullHeight)
+        opponentBull.position = CGPoint(x: size.width - (opponentBull.size.width/2 + margin60), y: bullHeight/2 + margin20)
         opponentBull.zPosition = 3
         addChild(opponentBull)
         
