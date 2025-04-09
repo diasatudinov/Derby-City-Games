@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct RootViewSL: View {
+struct RootViewDC: View {
     
     @State private var isLoading = true
     @State var toUp: Bool = true
@@ -67,5 +67,5 @@ struct RootViewSL: View {
 }
 
 #Preview {
-    RootViewSL()
+    RootViewDC()
 }

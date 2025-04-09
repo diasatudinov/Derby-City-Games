@@ -17,11 +17,11 @@ struct SettingsView: View {
                     
                     Button {
                         withAnimation {
-                            viewModel.soundEnabled.toggle()
+                            viewModel.musicEnabled.toggle()
                         }
                     } label: {
                         
-                        Image(viewModel.soundEnabled ? .onDC : .offDC)
+                        Image(viewModel.musicEnabled ? .onDC : .offDC)
                             .resizable()
                             .scaledToFit()
                             .frame(height: DeviceInfo.shared.deviceType == .pad ? 72:36)
