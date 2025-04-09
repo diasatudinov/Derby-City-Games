@@ -4,13 +4,17 @@ class DCUser: ObservableObject {
     
     static let shared = DCUser()
     
-    @AppStorage("money") var storedMoney: Int = 25000
-    @Published var money: Int = 25000
+    @AppStorage("achievement") var achievementNum: Int = 0
+    @AppStorage("money") var storedMoney: Int = 100
+    @Published var money: Int = 100
     @Published var oldMoney = 0
     init() {
         money = storedMoney
     }
     
+    func achievementDone() {
+        achievementNum += 1
+    }
     
     func updateUserMoney(for money: Int) {
         oldMoney = self.money
