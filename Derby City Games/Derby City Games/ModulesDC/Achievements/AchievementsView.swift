@@ -74,9 +74,10 @@ struct AchievementsView: View {
             Button {
                 if !achievement.recieved {
                     if !viewModel.getAchievement(for: achievement.image) {
-                        //viewModel.achievementIsDone(for: achievement.image)
+                      print("1")
                     } else {
                         viewModel.achievementRecieve(for: achievement)
+                        DCUser.shared.updateUserMoney(for: 10)
                     }
                 }
             } label: {

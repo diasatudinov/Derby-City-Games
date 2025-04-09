@@ -3,7 +3,8 @@ import SwiftUI
 struct SelectGameModeView: View {
     @Environment(\.presentationMode) var presentationMode
     @ObservedObject var storeVM: StoreViewModelDC
-    
+    @ObservedObject var achievementVM: AchievementsViewModel
+
     @State private var openOnline = false
     @State private var openAI = false
     @State private var openFriend = false
@@ -112,7 +113,7 @@ struct SelectGameModeView: View {
                 AIGameView(storeVM: storeVM)
             }
             .fullScreenCover(isPresented: $openFriend) {
-                GameView(storeVM: storeVM)
+                GameView(storeVM: storeVM, achievementVM: achievementVM)
             }
             .fullScreenCover(isPresented: $openOnline) {
                 AIGameView(storeVM: storeVM)
@@ -121,5 +122,5 @@ struct SelectGameModeView: View {
 }
 
 #Preview {
-    SelectGameModeView(storeVM: StoreViewModelDC())
+    SelectGameModeView(storeVM: StoreViewModelDC(), achievementVM: AchievementsViewModel())
 }

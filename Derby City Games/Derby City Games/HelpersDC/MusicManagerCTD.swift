@@ -1,11 +1,13 @@
+
+
 import AVFoundation
 
-class MusicManagerCTD {
-    static let shared = MusicManagerCTD()
+class DCSoundManager {
+    static let shared = DCSoundManager()
     var audioPlayer: AVAudioPlayer?
 
     func playBackgroundMusic() {
-        guard let url = Bundle.main.url(forResource: "gameMusicCTD", withExtension: "mp3") else { return }
+        guard let url = Bundle.main.url(forResource: "musicBgDC", withExtension: "mp3") else { return }
 
         do {
             audioPlayer = try AVAudioPlayer(contentsOf: url)

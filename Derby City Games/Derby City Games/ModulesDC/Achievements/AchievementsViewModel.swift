@@ -40,7 +40,34 @@ class AchievementsViewModel: ObservableObject {
         
         Achievement(image: "achievement16", title: "Golden Bull", subtitle: "Accumulate 10,000 coins", recieved: false),
         Achievement(image: "achievement17", title: "Invulnerable", subtitle: "Win the match without taking a single hit", recieved: false),
-    ]
+    ] {
+        didSet {
+            saveAchievementsItem()
+        }
+    }
+    init() {
+        loadAchievementsItem()
+        
+        
+    }
+    
+    private let userDefaultsAchievementsKey = "userDefaultsAchievementsKey"
+    
+    func saveAchievementsItem() {
+        if let encodedData = try? JSONEncoder().encode(achievements) {
+            UserDefaults.standard.set(encodedData, forKey: userDefaultsAchievementsKey)
+        }
+        
+    }
+    
+    func loadAchievementsItem() {
+        if let savedData = UserDefaults.standard.data(forKey: userDefaultsAchievementsKey),
+           let loadedItem = try? JSONDecoder().decode([Achievement].self, from: savedData) {
+            achievements = loadedItem
+        } else {
+            print("No saved data found")
+        }
+    }
     
     func achievementRecieve(for achievement: Achievement) {
         if let index = achievements.firstIndex(where: { $0.image == achievement.image }) {
